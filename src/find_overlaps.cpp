@@ -28,9 +28,10 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 	}		
 }
 
-void search_overlaps(map<string, vector<segment>> query, vector<map<string, node>> DBS, 
+void search_overlaps(map<string, vector<segment>> query, vector<map<string, node *>> DBS, 
 	string out, string job_name, ofstream& FHW ){
 	typedef map<string, vector<segment> >::iterator it_type;
+	typedef map<string, node * >::iterator it_type_2;
 
 	for (it_type c= query.begin(); c!= query.end(); c++){
 		vector<segment> q 	= c->second ;
@@ -42,7 +43,7 @@ void search_overlaps(map<string, vector<segment>> query, vector<map<string, node
 			vector<segment> FINDS;
 			for (int t = 0 ; t < DBS.size(); t++){
 				if (DBS[t].find(c->first)!= DBS[t].end() ){
-					DBS[t][c->first].searchInterval(q[i].start, q[i].stop,FINDS);
+					DBS[t][c->first]->searchInterval(q[i].start, q[i].stop,FINDS);
 				}
 			}
 			q[i].overlaps 	= FINDS;
@@ -54,6 +55,12 @@ void search_overlaps(map<string, vector<segment>> query, vector<map<string, node
 	
 	}
 	write_out(query, out, job_name);
+	for (int t = 0; t < DBS.size(); t++){
+		for (it_type_2 c=DBS[t].begin(); c!= DBS[t].end(); c++){
+			delete DBS[t][c->first];
+		}
+	}
+
 
 
 }

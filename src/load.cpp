@@ -36,9 +36,8 @@ void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string
 			if (line.substr(0,1)!="#"){
 				lineArray=splitter(line, "\t");
 				if (lineArray.size() > 2){
-					chrom 	= lineArray[0];
 					if (isNumeric(lineArray[1]) and isNumeric(lineArray[2])  ){
-
+						chrom 	= lineArray[0];
 						start 	= stoi(lineArray[1]);
 						stop 	= stoi(lineArray[2]);
 						info 	= "";
@@ -56,7 +55,6 @@ void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string
 						segment S(chrom,start, stop, info, i);
 						i+=1;
 						G[chrom].push_back(S);
-						prevChrom=chrom;
 					}
 					else{
 						EXIT=true;
@@ -107,7 +105,15 @@ node::node(vector<segment> segments ){
 	if (Right.size() > 0){
 		right 	= new node(Right);
 	}
+}
 
+node::~node(){
+	if (left != NULL){
+		delete left;
+	}
+	if (right != NULL){
+		delete right;
+	}
 }
 
 void node::searchInterval(int st, int sp, vector<segment> & FINDS){
@@ -152,11 +158,11 @@ void bubble_sort(map<string, vector<segment> > G,
 
 
 
-vector<map<string, node> > load_input_directory(string path, ofstream& FHW){
+vector<map<string, node * > > load_input_directory(string path, ofstream& FHW){
 	struct dirent *entry;
 	DIR *dp;
 
-	vector<map<string, node>> TS;
+	vector<map<string, node *>> TS;
 	dp = opendir(path.c_str());
 	if (dp == NULL) {
 		perror("opendir: Path does not exist or could not be read.");
@@ -166,7 +172,7 @@ vector<map<string, node> > load_input_directory(string path, ofstream& FHW){
 	typedef map<string, vector<segment> >::iterator it_type;
 	while ((entry = readdir(dp))){
 		string current_file_name 	= entry->d_name;
-		map<string, node> T;
+		map<string, node *> T;
 		map<string, vector<segment> > DB;
 		load_DB(path+current_file_name, DB, i, current_file_name);
 		vector<string> chromosomes;
@@ -182,7 +188,7 @@ vector<map<string, node> > load_input_directory(string path, ofstream& FHW){
 			FHW.flush();
 			#pragma omp parallel for  
 			for (int c= 0; c <  N; c++){
-				T[chromosomes[c]]=node(DB[chromosomes[c]] );
+				T[chromosomes[c]]= new node(DB[chromosomes[c]] );
 			}
 			FHW<<"done\n";
 			FHW.flush();

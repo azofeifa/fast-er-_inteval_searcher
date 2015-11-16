@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
 	FHW.open(log_out+ "tmp-"+job_name+".log" );
 
 	int rebuild 			= stoi(P->p["-rebuild"]);
-	vector<map<string, node>> DBS	= load_input_directory(input_directory, FHW);
+	vector<map<string, node *>> DBS	= load_input_directory(input_directory, FHW);
 	map<string, vector<segment>> query;
 	int q=0;
 	load_DB(query_file, query, q,"");

@@ -20,13 +20,15 @@ public:
 	node * left;
 	node * right;
 	vector<segment> current;
+
 	node();
+	~node();
 	node(vector<segment>);
 	void searchInterval(int, int, vector<segment>&);
 };
 
 
-vector<map<string, node> > load_input_directory(string, ofstream&);
+vector<map<string, node *> > load_input_directory(string, ofstream&);
 void load_DB(string, map<string, vector<segment>>& , int &, string );
 
 #endif
