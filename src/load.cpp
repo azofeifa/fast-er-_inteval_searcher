@@ -42,7 +42,7 @@ void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string
 						stop 	= stoi(lineArray[2]);
 						info 	= "";
 						if (lineArray.size()>3){
-							info 	= lineArray[3];
+							info 	= lineArray[3] + ":"+label;
 						}
 						segment S(chrom,start, stop, info, i);
 						G[chrom].push_back(S);
