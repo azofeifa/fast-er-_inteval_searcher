@@ -14,7 +14,8 @@
 using namespace std;
 
 params::params(){
-	p["-rebuild"]="0";
+	p["-rebuild"] 	="0";
+	p["-pairwise"] 	= "0";
 	p["-i"] 	= "";
 	p["-q"] 	= "";
 	p["-o"] 	= "";

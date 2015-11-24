@@ -20,7 +20,7 @@ public:
 	node * left;
 	node * right;
 	vector<segment> current;
-
+	void retrieve_nodes(vector<segment>&);
 	node();
 	~node();
 	node(vector<segment>);
@@ -28,7 +28,7 @@ public:
 };
 
 
-vector<map<string, node *> > load_input_directory(string, ofstream&);
+vector<map<string, node *> > load_input_directory(string, vector<string> &, ofstream&);
 void load_DB(string, map<string, vector<segment>>& , int &, string );
 
 #endif

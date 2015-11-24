@@ -34,7 +34,7 @@ void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string
 		while(getline(FH, line) and not EXIT){
 
 			if (line.substr(0,1)!="#"){
-				lineArray=splitter(line, "\t");
+				lineArray=splitter2(line, "\t");
 				if (lineArray.size() > 2){
 					if (isNumeric(lineArray[1]) and isNumeric(lineArray[2])  ){
 						chrom 	= lineArray[0];
@@ -122,14 +122,27 @@ void node::searchInterval(int st, int sp, vector<segment> & FINDS){
 			FINDS.push_back(current[i]);
 		}
 	}	
-	if (sp > center and right != NULL ){
+	if (sp >= center and right != NULL ){
 		right->searchInterval(st, sp, FINDS);
 	}
-	if (st < center and left !=NULL){
+	if (st <= center and left !=NULL){
 		left->searchInterval(st, sp, FINDS);
-	}
-	
+	}	
 }
+
+void node::retrieve_nodes(vector<segment> & saves){
+	for (int i = 0; i < current.size(); i++){
+		saves.push_back(current[i]);
+	}
+	if (right!= NULL){
+		right->retrieve_nodes(saves);
+	}
+	if (left != NULL){
+		left->retrieve_nodes(saves);		
+	}
+
+}
+
 
 //sort database
 void bubble_sort(map<string, vector<segment> > G, 
@@ -158,7 +171,7 @@ void bubble_sort(map<string, vector<segment> > G,
 
 
 
-vector<map<string, node * > > load_input_directory(string path, ofstream& FHW){
+vector<map<string, node * > > load_input_directory(string path, vector<string>&  FILE_NAMES, ofstream& FHW){
 	struct dirent *entry;
 	DIR *dp;
 
@@ -179,11 +192,9 @@ vector<map<string, node * > > load_input_directory(string path, ofstream& FHW){
 		for (it_type c = DB.begin(); c!= DB.end(); c++){
 			chromosomes.push_back(c->first);
 		}
-
-
-
 		int N 	= chromosomes.size();
 		if ( N > 0 ){
+			FILE_NAMES.push_back(current_file_name);
 			FHW<<"loading: " + current_file_name +"...";
 			FHW.flush();
 			#pragma omp parallel for  

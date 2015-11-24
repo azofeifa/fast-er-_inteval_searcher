@@ -28,6 +28,82 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 	}		
 }
 
+void compute_pairwise(vector<map<string, node *>> DBS, 
+		vector<string> FILE_NAMES, ofstream& FHW, string out_directory){
+	int N 	= DBS.size();
+	int counts[N][N];
+	//initialize to zero
+	for (int i = 0; i < N; i++){
+		for (int j = 0; j < N; j++){
+			counts[i][j]=0;
+		}
+	}
+	//make pairwise counts
+	typedef map<string, node * >::iterator it_type;
+	typedef map<string, vector<segment> >::iterator it_type_2;
+	double percent = 0;
+	int ct 	 	= 0;
+	for (int i = 0; i < N; i++){
+		map<string, node * > A =  DBS[i];
+		map<string, vector<segment> > current;
+		int i_ct 	= 0;
+		for (it_type a_chrom = A.begin(); a_chrom != A.end(); a_chrom++ ){
+			vector<segment> CURRENT;
+			a_chrom->second->retrieve_nodes(CURRENT);
+			i_ct+=int(CURRENT.size());
+			current[a_chrom->first]=CURRENT;
+
+		}	
+		if (double(i) / N > (percent + 0.05)){
+			ct+=5;
+			FHW<<to_string(ct) + "%,";
+			percent+=0.05;
+		}
+		counts[i][i] 	= i_ct;
+		#pragma omp parallel for  
+		for (int j = 0; j < N; j++){
+			if (j != i){
+				map<string, node * > B 	= DBS[j];
+				int ct 					= 0;
+				for (it_type_2 a_chrom = current.begin(); a_chrom != current.end(); a_chrom++ ){
+					if (B.find(a_chrom->first)!=B.end()  ){
+						vector<segment> FINDS;
+						for (int s = 0; s < a_chrom->second.size(); s++){
+							B[a_chrom->first]->searchInterval(a_chrom->second[s].start, a_chrom->second[s].stop, FINDS);
+							//printf("%d-%d,%d\n", a_chrom->second[s].start, a_chrom->second[s].stop, FINDS.size()  );
+						}
+						ct+=int(FINDS.size());
+					}
+				}
+				counts[i][j]=ct;
+			}
+		}
+	}
+	FHW<<"done :)\n";
+	//write out counts  and file names
+	ofstream OUT;
+	OUT.open(out_directory + "pairwise_count_matrix.csv");
+	for (int i = 0; i < N; i++){
+		OUT<<to_string(i) + "," + FILE_NAMES[i] + "\n";
+	}
+	OUT<<"#------------------------------------------"<<endl;
+	for (int i = 0 ; i < N ; i++){
+		string line = "";
+		for (int j = 0; j < N; j++){
+			if (j+1 < N){
+				line+=to_string(counts[i][j])+",";
+			}else{
+				line+=to_string(counts[i][j])+ "\n";
+			}
+		}
+		OUT<<line;
+	}
+	OUT.close();
+
+
+
+}
+
 void search_overlaps(map<string, vector<segment>> query, vector<map<string, node *>> DBS, 
 	string out, string job_name, ofstream& FHW ){
 	typedef map<string, vector<segment> >::iterator it_type;
@@ -60,7 +136,5 @@ void search_overlaps(map<string, vector<segment>> query, vector<map<string, node
 			delete DBS[t][c->first];
 		}
 	}
-
-
 
 }
