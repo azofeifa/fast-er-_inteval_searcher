@@ -57,6 +57,7 @@ void compute_pairwise(vector<map<string, node *>> DBS,
 		if (double(i) / N > (percent + 0.05)){
 			ct+=5;
 			FHW<<to_string(ct) + "%,";
+			FHW.flush();
 			percent+=0.05;
 		}
 		counts[i][i] 	= i_ct;
