@@ -21,7 +21,7 @@ bool isNumeric(const string& input) {
 }
 
 
-void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string label ){
+void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string label, int upad, int pad ){
 	ifstream FH(filename);
 	map<string, vector<segment> > G;
 	bool EXIT 	= false;
@@ -40,6 +40,14 @@ void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string
 						chrom 	= lineArray[0];
 						start 	= stoi(lineArray[1]);
 						stop 	= stoi(lineArray[2]);
+						if (upad){
+							double x 	= (start + stop)/2.;
+							start 	= int(x - upad), stop = int(x + upad);
+						}else if(pad){
+							start-=pad, stop+=pad;
+						}
+
+
 						info 	= "";
 						if (lineArray.size()>3){
 							info 	= lineArray[3] + ":"+label;
@@ -171,7 +179,7 @@ void bubble_sort(map<string, vector<segment> > G,
 
 
 
-vector<map<string, node * > > load_input_directory(string path, vector<string>&  FILE_NAMES, ofstream& FHW){
+vector<map<string, node * > > load_input_directory(string path, vector<string>&  FILE_NAMES, ofstream& FHW, int upad, int pad){
 	struct dirent *entry;
 	DIR *dp;
 
@@ -187,7 +195,7 @@ vector<map<string, node * > > load_input_directory(string path, vector<string>& 
 		string current_file_name 	= entry->d_name;
 		map<string, node *> T;
 		map<string, vector<segment> > DB;
-		load_DB(path+current_file_name, DB, i, current_file_name);
+		load_DB(path+current_file_name, DB, i, current_file_name, 0, 0);
 		vector<string> chromosomes;
 		for (it_type c = DB.begin(); c!= DB.end(); c++){
 			chromosomes.push_back(c->first);

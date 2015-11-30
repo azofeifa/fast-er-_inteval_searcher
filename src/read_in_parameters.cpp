@@ -19,6 +19,8 @@ params::params(){
 	p["-i"] 	= "";
 	p["-q"] 	= "";
 	p["-o"] 	= "";
+	p["-pad"] 	= "0";
+	p["-upad"] 	= "0";
 	p["log_out"]= "";
 	p["-N"] 	= "FIS_RUN";
 }

@@ -18,6 +18,8 @@ int main(int argc, char* argv[]){
 	string out_directory 	= P->p["-o"];
 	string job_name 		= P->p["-N"];
 	string log_out 			= P->p["-log_out"];
+	int upad 				= stoi(P->p["-upad"]);
+	int pad 				= stoi(P->p["-pad"]);
 	int pairwise 			= stoi(P->p["-pairwise"]);
 	if (log_out.empty()){
 		log_out 	= out_directory;
@@ -25,12 +27,12 @@ int main(int argc, char* argv[]){
 	ofstream FHW;
 	FHW.open(log_out+ "tmp-"+job_name+".log" );
 	vector<string> FILE_NAMES;
-	vector<map<string, node *>> DBS	= load_input_directory(input_directory,  FILE_NAMES, FHW);
+	vector<map<string, node *>> DBS	= load_input_directory(input_directory,  FILE_NAMES, FHW, upad, pad);
 	if (not pairwise){
 
 		map<string, vector<segment>> query;
 		int q=0;
-		load_DB(query_file, query, q,"");
+		load_DB(query_file, query, q,"", upad, pad);
 
 		search_overlaps( query,  DBS, out_directory, job_name, FHW );
 	}else{

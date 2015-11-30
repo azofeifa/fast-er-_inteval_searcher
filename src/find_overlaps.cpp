@@ -71,7 +71,7 @@ void compute_pairwise(vector<map<string, node *>> DBS,
 						vector<segment> FINDS;
 						for (int s = 0; s < a_chrom->second.size(); s++){
 							B[a_chrom->first]->searchInterval(a_chrom->second[s].start, a_chrom->second[s].stop, FINDS);
-							//printf("%d-%d,%d\n", a_chrom->second[s].start, a_chrom->second[s].stop, FINDS.size()  );
+							printf("%d-%d,%d\n", a_chrom->second[s].start, a_chrom->second[s].stop, FINDS.size()  );
 						}
 						ct+=int(FINDS.size());
 					}
