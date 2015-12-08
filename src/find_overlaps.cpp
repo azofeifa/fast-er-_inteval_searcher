@@ -32,7 +32,8 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 	FHW_stats.open(OUT+ job_name+ "_stats.tsv");
 
 	double a 	= -upad, b = upad;
-	map<string, vector<double> > stats 	= get_stats(query,a,b) ;
+	map<string, vector<double> > distances ;
+	map<string, vector<double> > stats 		= get_stats(query,a,b,distances) ;
 	typedef map<string, vector<double> >::iterator it_type_2;
 	for (it_type_2 m = stats.begin(); m!=stats.end(); m++){
 		if (m->second.size()==6){
@@ -40,6 +41,20 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 			FHW_stats<<to_string(m->second[2]) + ","+ to_string(m->second[3]) + "\t";
 			FHW_stats<<to_string(m->second[4]) + ","+ to_string(m->second[5]) + "\n";
 		}
+	}
+	FHW_stats<<"#begin distances\n";
+	for (it_type_2 m = distances.begin(); m!=distances.end(); m++){
+		string line = "";
+		FHW_stats<<m->first<<"\t";
+		for (int i = 0 ; i < m->second.size(); i++){
+			if (i+1 < m->second.size() ){
+				line+=to_string(m->second[i])+ ",";
+			}else{
+				line+=to_string(m->second[i]);
+			}
+		}
+		FHW_stats<<line<<endl;
+		
 	}
 
 

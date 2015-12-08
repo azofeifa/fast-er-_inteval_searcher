@@ -2,8 +2,7 @@
 #include <cmath>
 #include <algorithm>
 using namespace std;
-map<string, vector<double> > get_distances(map<string, vector<segment> > query  ){
-	map<string, vector<double> > distances;
+void get_distances(map<string, vector<segment> > query, map<string, vector<double> > & distances  ){
 	typedef map<string, vector<segment> >::iterator it_type;
 	for (it_type c= query.begin(); c!= query.end(); c++){
 		vector<segment> q 	= c->second ;
@@ -18,7 +17,6 @@ map<string, vector<double> > get_distances(map<string, vector<segment> > query  
 			}
 		}
 	}		
-	return distances;	
 }
 
 void BIN(vector<double> raw_data, int bins, double ** & X){
@@ -125,11 +123,12 @@ double normal_constant(double MU, double SI, double A, double B){
 }
 
 
-map<string, vector<double> > get_stats(map<string, vector<segment>> query, double a, double b){
+map<string, vector<double> > get_stats(map<string, vector<segment>> query, 
+	double a, double b , map<string, vector<double> > & distances){
 	map<string, vector<double> > stats; 	
 
 	//get_distances_by_motif
-	map<string, vector<double> > distances 	= get_distances(query);
+	get_distances(query, distances);
 	typedef map<string, vector<double> >::iterator it_type;
 
 	int BINS=200;

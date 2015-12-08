@@ -5,5 +5,5 @@
 #include <vector>
 #include <string>
 using namespace std;
-map<string, vector<double> > get_stats(map<string, vector<segment>>, double, double);
+map<string, vector<double> > get_stats(map<string, vector<segment>>, double, double, map<string, vector<double>>&  );
 #endif
