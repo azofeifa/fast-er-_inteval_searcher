@@ -3,12 +3,13 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-
+#include "EM.h"
 using namespace std;
 
-void write_out(map<string, vector<segment>> query  , string OUT, string job_name ){
+void write_out(map<string, vector<segment>> query  , string OUT, string job_name, int upad ){
+	//write out raw distances
 	ofstream FHW;
-	FHW.open(OUT+ job_name+ "_overlaps.bed");
+	FHW.open(OUT+ job_name+ "_raw_distances.bed");
 	typedef map<string, vector<segment> >::iterator it_type;
 	for (it_type c= query.begin(); c!= query.end(); c++){
 		vector<segment> q 	= c->second ;
@@ -26,10 +27,27 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 			FHW<<q[i].chrom+"\t"+to_string(q[i].start) + "\t" + to_string(q[i].stop)+ "\t" + INF<<endl;
 		}
 	}		
+	//write out EM results for each motif
+	ofstream FHW_stats;
+	FHW_stats.open(OUT+ job_name+ "_stats.tsv");
+
+	double a 	= -upad, b = upad;
+	map<string, vector<double> > stats 	= get_stats(query,a,b) ;
+	typedef map<string, vector<double> >::iterator it_type_2;
+	for (it_type_2 m = stats.begin(); m!=stats.end(); m++){
+		if (m->second.size()==6){
+			FHW_stats<<m->first+"\t" + to_string(m->second[0]) + ","+ to_string(m->second[1]) + "\t";
+			FHW_stats<<to_string(m->second[2]) + ","+ to_string(m->second[3]) + "\t";
+			FHW_stats<<to_string(m->second[4]) + ","+ to_string(m->second[5]) + "\n";
+		}
+	}
+
+
+
 }
 
 void compute_pairwise(vector<map<string, node *>> DBS, 
-		vector<string> FILE_NAMES, ofstream& FHW, string out_directory){
+		vector<string> FILE_NAMES,  string out_directory){
 	int N 	= DBS.size();
 	int counts[N][N];
 	//initialize to zero
@@ -54,12 +72,6 @@ void compute_pairwise(vector<map<string, node *>> DBS,
 			current[a_chrom->first]=CURRENT;
 
 		}	
-		if (double(i) / N > (percent + 0.05)){
-			ct+=5;
-			FHW<<to_string(ct) + "%,";
-			FHW.flush();
-			percent+=0.05;
-		}
 		counts[i][i] 	= i_ct;
 		#pragma omp parallel for  
 		for (int j = 0; j < N; j++){
@@ -71,7 +83,6 @@ void compute_pairwise(vector<map<string, node *>> DBS,
 						vector<segment> FINDS;
 						for (int s = 0; s < a_chrom->second.size(); s++){
 							B[a_chrom->first]->searchInterval(a_chrom->second[s].start, a_chrom->second[s].stop, FINDS);
-							printf("%d-%d,%d\n", a_chrom->second[s].start, a_chrom->second[s].stop, FINDS.size()  );
 						}
 						ct+=int(FINDS.size());
 					}
@@ -80,7 +91,6 @@ void compute_pairwise(vector<map<string, node *>> DBS,
 			}
 		}
 	}
-	FHW<<"done :)\n";
 	//write out counts  and file names
 	ofstream OUT;
 	OUT.open(out_directory + "pairwise_count_matrix.csv");
@@ -106,14 +116,12 @@ void compute_pairwise(vector<map<string, node *>> DBS,
 }
 
 void search_overlaps(map<string, vector<segment>> query, vector<map<string, node *>> DBS, 
-	string out, string job_name, ofstream& FHW ){
+	string out, string job_name, int upad ){
 	typedef map<string, vector<segment> >::iterator it_type;
 	typedef map<string, node * >::iterator it_type_2;
 
 	for (it_type c= query.begin(); c!= query.end(); c++){
 		vector<segment> q 	= c->second ;
-		FHW<<"ID-ing overlaps for chromosome " + c->first+"...\n";
-		FHW.flush();
 		int N 				= q.size();
 		#pragma omp parallel for  
 		for (int i = 0 ; i < q.size(); i++){
@@ -125,13 +133,9 @@ void search_overlaps(map<string, vector<segment>> query, vector<map<string, node
 			}
 			q[i].overlaps 	= FINDS;
 		}
-		FHW<<"done...\n";
-		FHW.flush();
 		query[c->first]=q;
-
-	
 	}
-	write_out(query, out, job_name);
+	write_out(query, out, job_name, upad);
 	for (int t = 0; t < DBS.size(); t++){
 		for (it_type_2 c=DBS[t].begin(); c!= DBS[t].end(); c++){
 			delete DBS[t][c->first];

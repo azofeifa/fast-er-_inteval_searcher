@@ -21,7 +21,6 @@ params::params(){
 	p["-o"] 	= "";
 	p["-pad"] 	= "0";
 	p["-upad"] 	= "0";
-	p["log_out"]= "";
 	p["-N"] 	= "FIS_RUN";
 }
 const std::string currentDateTime() {
@@ -46,8 +45,6 @@ void params::display(){
 	cout<<"-i          : "<<p["-i"]<<endl;
 	cout<<"-q          : "<<p["-q"]<<endl;
 	cout<<"-o          : "<<p["-o"]<<endl;
-	cout<<"-log_out    : "<<p["-log_out"]<<endl;
-	cout<<"-rebuild    : "<<p["-rebuild"]<<endl;
 
 
 	cout<<"Bugs/Questions? joseph[dot]azofeifa[at]colorado[dot]edu"<<endl;

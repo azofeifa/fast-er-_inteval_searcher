@@ -3,7 +3,7 @@
 #include "load.h"
 using namespace std;
 void search_overlaps(map<string, vector<segment>>  , 
-	vector<map<string, node * >>, string, string, ofstream&  );
+	vector<map<string, node * >>, string, string , int );
 void compute_pairwise(vector<map<string, node *>> ,  
-	vector<string> , ofstream&, string );	
+	vector<string> ,  string );	
 #endif

@@ -17,32 +17,22 @@ int main(int argc, char* argv[]){
 	string query_file 		= P->p["-q"];
 	string out_directory 	= P->p["-o"];
 	string job_name 		= P->p["-N"];
-	string log_out 			= P->p["-log_out"];
 	int upad 				= stoi(P->p["-upad"]);
 	int pad 				= stoi(P->p["-pad"]);
 	int pairwise 			= stoi(P->p["-pairwise"]);
-	if (log_out.empty()){
-		log_out 	= out_directory;
-	}
-	ofstream FHW;
-	FHW.open(log_out+ "tmp-"+job_name+".log" );
 	vector<string> FILE_NAMES;
-	vector<map<string, node *>> DBS	= load_input_directory(input_directory,  FILE_NAMES, FHW, upad, pad);
+	vector<map<string, node *>> DBS	= load_input_directory(input_directory,  FILE_NAMES, upad, pad);
 	if (not pairwise){
 
 		map<string, vector<segment>> query;
 		int q=0;
 		load_DB(query_file, query, q,"", upad, pad);
 
-		search_overlaps( query,  DBS, out_directory, job_name, FHW );
+		search_overlaps( query,  DBS, out_directory, job_name, upad );
 	}else{
-		FHW<<"(main) computing pairwise overlaps"<<endl;
-		compute_pairwise( DBS, FILE_NAMES, FHW,  out_directory);
+		compute_pairwise( DBS, FILE_NAMES ,  out_directory);
 	}
 
-	string name 	= log_out+ "tmp-"+job_name+".log" ;
-	if( remove( name.c_str()) != 0 )
-		perror( "Error deleting file" );
 	
 	return 1;
 }

@@ -28,7 +28,7 @@ public:
 };
 
 
-vector<map<string, node *> > load_input_directory(string, vector<string> &, ofstream&, int, int);
+vector<map<string, node *> > load_input_directory(string, vector<string> &, int, int);
 void load_DB(string, map<string, vector<segment>>& , int &, string , int, int);
 
 #endif

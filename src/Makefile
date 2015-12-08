@@ -13,9 +13,9 @@ CPP_FLAGS_32  	= -D32_BIT
 CPP_FLAGS_64  	= -D64_BIT
 
 GCCVERSION 		= $(shell ${CXX} -dumpversion)
-FIS: main.o read_in_parameters.o split.o load.o find_overlaps.o
+FIS: main.o read_in_parameters.o split.o load.o find_overlaps.o EM.o
 	@printf "linking           : "
-	@${CXX} ${CXXFLAGS} -o ${EXEC}  ${PWD}/main.o ${PWD}/read_in_parameters.o ${PWD}/split.o ${PWD}/load.o ${PWD}/find_overlaps.o  
+	@${CXX} ${CXXFLAGS} -o ${EXEC}  ${PWD}/main.o ${PWD}/read_in_parameters.o ${PWD}/split.o ${PWD}/load.o ${PWD}/find_overlaps.o ${PWD}/EM.o  
 	@printf "done\n"
 	@echo "========================================="
 	@printf "finished :)\n"
@@ -25,6 +25,10 @@ main.o:
 	@echo "GCC version: "${GCCVERSION}
 	@printf "main              : "
 	@${CXX} -c ${CXXFLAGS} ${PWD}/main.cpp 
+	@printf "done\n"
+EM.o: 
+	@printf "EM                : "
+	@${CXX} -c ${CXXFLAGS} ${PWD}/EM.cpp 
 	@printf "done\n"
 load.o: 
 	@printf "load              : "

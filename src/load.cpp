@@ -10,6 +10,7 @@
 #include <cctype>
 #include <algorithm>
 #include <omp.h>  
+#include <time.h>  
 using namespace std;
 
 segment::segment(){}
@@ -53,7 +54,9 @@ void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string
 							info 	= lineArray[3] + ":"+label;
 						}
 						segment S(chrom,start, stop, info, i);
-						G[chrom].push_back(S);
+						if (S.start < S.stop){
+							G[chrom].push_back(S);
+						}
 						i+=1;
 					}else if(isNumeric(lineArray[2]) and isNumeric(lineArray[3])  ){
 						chrom 	= lineArray[1];
@@ -62,7 +65,9 @@ void load_DB(string filename, map<string, vector<segment> >& DB, int & i, string
 						info 	= lineArray[0] + ":"+ label;
 						segment S(chrom,start, stop, info, i);
 						i+=1;
-						G[chrom].push_back(S);
+						if (S.start < S.stop){
+							G[chrom].push_back(S);
+						}
 					}
 					else{
 						EXIT=true;
@@ -152,47 +157,30 @@ void node::retrieve_nodes(vector<segment> & saves){
 }
 
 
-//sort database
-void bubble_sort(map<string, vector<segment> > G, 
-	map<string ,vector<segment>>& by_start ){
-	typedef map<string, vector<segment> >::iterator it_type;
-	for (it_type c = G.begin(); c!=G.end(); c++){
-		bool GOOD=false;
-		vector<segment> A 	= c->second;
-		vector<segment> B 	= c->second;
-		while (not GOOD){
-			GOOD=true;
-			//by starting position
-			for (int i =1; i < A.size(); i++){
-				if (A[i].start < A[i-1].start){
-					segment cp 				= A[i-1];
-					A[i-1] 			= A[i];
-					A[i] 			= cp;
-					GOOD=false;
-				}
-			}			
-		}
-		by_start[c->first]=A;
-		
-	}
-}
 
-
-
-vector<map<string, node * > > load_input_directory(string path, vector<string>&  FILE_NAMES, ofstream& FHW, int upad, int pad){
+vector<map<string, node * > > load_input_directory(string path, vector<string>&  FILE_NAMES, int upad, int pad){
 	struct dirent *entry;
 	DIR *dp;
-
-	vector<map<string, node *>> TS;
+	int threads 	= omp_get_max_threads();//number of openMP threads that are available for use
 	dp = opendir(path.c_str());
 	if (dp == NULL) {
 		perror("opendir: Path does not exist or could not be read.");
-		return TS;
+		vector<map<string, node *>> empty;
+		return empty;
 	}
 	int i 	= 0;
 	typedef map<string, vector<segment> >::iterator it_type;
+	//get_files
+	vector<string> files_to_load;
 	while ((entry = readdir(dp))){
 		string current_file_name 	= entry->d_name;
+		files_to_load.push_back(current_file_name);
+	}	
+	int N 	= files_to_load.size();
+	vector<map<string, node *>> TS(N);
+	#pragma omp parallel for num_threads(threads)
+	for (int j = 0; j < N; j++){
+		string current_file_name 	= files_to_load[j];
 		map<string, node *> T;
 		map<string, vector<segment> > DB;
 		load_DB(path+current_file_name, DB, i, current_file_name, 0, 0);
@@ -200,23 +188,15 @@ vector<map<string, node * > > load_input_directory(string path, vector<string>& 
 		for (it_type c = DB.begin(); c!= DB.end(); c++){
 			chromosomes.push_back(c->first);
 		}
-		int N 	= chromosomes.size();
-		if ( N > 0 ){
+		int NN 	= chromosomes.size();
+		if ( NN > 0 ){
 			FILE_NAMES.push_back(current_file_name);
-			FHW<<"loading: " + current_file_name +"...";
-			FHW.flush();
-			#pragma omp parallel for  
-			for (int c= 0; c <  N; c++){
+			for (int c= 0; c <  NN; c++){
 				T[chromosomes[c]]= new node(DB[chromosomes[c]] );
 			}
-			FHW<<"done\n";
-			FHW.flush();
-			TS.push_back(T);
+			TS[j] = T;
 		}
-
 	}
-
-	
 	closedir(dp);
 	return TS;
 }
