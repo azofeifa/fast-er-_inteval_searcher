@@ -36,10 +36,11 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 	map<string, vector<double> > stats 		= get_stats(query,a,b,distances) ;
 	typedef map<string, vector<double> >::iterator it_type_2;
 	for (it_type_2 m = stats.begin(); m!=stats.end(); m++){
-		if (m->second.size()==6){
+		if (m->second.size()==8){
 			FHW_stats<<m->first+"\t" + to_string(m->second[0]) + ","+ to_string(m->second[1]) + "\t";
 			FHW_stats<<to_string(m->second[2]) + ","+ to_string(m->second[3]) + "\t";
 			FHW_stats<<to_string(m->second[4]) + ","+ to_string(m->second[5]) + "\n";
+			FHW_stats<<to_string(m->second[6]) + ","+ to_string(m->second[7]) + "\n";
 		}
 	}
 	FHW_stats<<"#begin distances\n";
