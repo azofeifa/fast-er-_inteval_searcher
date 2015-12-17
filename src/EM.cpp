@@ -2,18 +2,38 @@
 #include <cmath>
 #include <algorithm>
 using namespace std;
-void get_distances(map<string, vector<segment> > query, map<string, vector<double> > & distances  ){
+void get_distances(map<string, vector<segment> > query, map<string, vector<double> > & distances, int MIN  ){
 	typedef map<string, vector<segment> >::iterator it_type;
 	for (it_type c= query.begin(); c!= query.end(); c++){
 		vector<segment> q 	= c->second ;
 		for (int i = 0 ; i < q.size(); i++){
-			string INF 	= q[i].info+"|" ;
-			int ON 		= q[i].overlaps.size();
-			for (int o = 0; o < q[i].overlaps.size(); o++){
-				double a 	= (q[i].start + q[i].stop) / 2.;
-				double b 	= (q[i].overlaps[o].start + q[i].overlaps[o].stop) / 2.; 
-				double d 	= a-b;
-				distances[q[i].overlaps[o].info].push_back(d);
+			if (not MIN){
+				string INF 	= q[i].info+"|" ;
+				int ON 		= q[i].overlaps.size();
+				for (int o = 0; o < q[i].overlaps.size(); o++){
+					double a 	= (q[i].start + q[i].stop) / 2.;
+					double b 	= (q[i].overlaps[o].start + q[i].overlaps[o].stop) / 2.; 
+					double d 	= a-b;
+					distances[q[i].overlaps[o].info].push_back(d);
+				}
+			}else{
+				map<string, double> argmin_distances;
+				int ON 		= q[i].overlaps.size();
+				for (int o = 0; o < q[i].overlaps.size(); o++){
+					double a 	= (q[i].start + q[i].stop) / 2.;
+					double b 	= (q[i].overlaps[o].start + q[i].overlaps[o].stop) / 2.; 
+					double d 	= a-b;
+					
+					if (argmin_distances.find(q[i].overlaps[o].info) == argmin_distances.end()){
+						argmin_distances[q[i].overlaps[o].info] = d;
+					}else{
+						argmin_distances[q[i].overlaps[o].info] = min(abs(argmin_distances[q[i].overlaps[o].info]), abs(d));
+					}
+				}
+				typedef map<string, double>::iterator it_type;
+				for (it_type d = argmin_distances.begin(); d!=argmin_distances.end(); d++){
+					distances[d->first].push_back(d->second);
+				}
 			}
 		}
 	}		
@@ -132,11 +152,11 @@ double normal_constant(double MU, double SI, double A, double B){
 
 
 map<string, vector<double> > get_stats(map<string, vector<segment>> query, 
-	double a, double b , map<string, vector<double> > & distances){
+	double a, double b , map<string, vector<double> > & distances, int MIN){
 	map<string, vector<double> > stats; 	
 
 	//get_distances_by_motif
-	get_distances(query, distances);
+	get_distances(query, distances, MIN);
 	typedef map<string, vector<double> >::iterator it_type;
 
 	int BINS=200;

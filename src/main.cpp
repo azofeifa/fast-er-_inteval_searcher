@@ -20,6 +20,7 @@ int main(int argc, char* argv[]){
 	int upad 				= stoi(P->p["-upad"]);
 	int pad 				= stoi(P->p["-pad"]);
 	int pairwise 			= stoi(P->p["-pairwise"]);
+	int MIN 				= stoi(P->p["-min"]);
 	vector<string> FILE_NAMES;
 	vector<map<string, node *>> DBS	= load_input_directory(input_directory,  FILE_NAMES, upad, pad);
 	if (not pairwise){
@@ -28,7 +29,7 @@ int main(int argc, char* argv[]){
 		int q=0;
 		load_DB(query_file, query, q,"", upad, pad);
 
-		search_overlaps( query,  DBS, out_directory, job_name, upad );
+		search_overlaps( query,  DBS, out_directory, job_name, upad, MIN );
 	}else{
 		compute_pairwise( DBS, FILE_NAMES ,  out_directory);
 	}

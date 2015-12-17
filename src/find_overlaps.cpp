@@ -6,7 +6,7 @@
 #include "EM.h"
 using namespace std;
 
-void write_out(map<string, vector<segment>> query  , string OUT, string job_name, int upad ){
+void write_out(map<string, vector<segment>> query  , string OUT, string job_name, int upad, int MIN ){
 	//write out raw distances
 	ofstream FHW;
 	FHW.open(OUT+ job_name+ "_raw_distances.bed");
@@ -33,7 +33,7 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 
 	double a 	= -upad, b = upad;
 	map<string, vector<double> > distances ;
-	map<string, vector<double> > stats 		= get_stats(query,a,b,distances) ;
+	map<string, vector<double> > stats 		= get_stats(query,a,b,distances, MIN) ;
 	typedef map<string, vector<double> >::iterator it_type_2;
 	for (it_type_2 m = stats.begin(); m!=stats.end(); m++){
 		if (m->second.size()==8){
@@ -132,7 +132,7 @@ void compute_pairwise(vector<map<string, node *>> DBS,
 }
 
 void search_overlaps(map<string, vector<segment>> query, vector<map<string, node *>> DBS, 
-	string out, string job_name, int upad ){
+	string out, string job_name, int upad, int MIN ){
 	typedef map<string, vector<segment> >::iterator it_type;
 	typedef map<string, node * >::iterator it_type_2;
 
@@ -151,7 +151,7 @@ void search_overlaps(map<string, vector<segment>> query, vector<map<string, node
 		}
 		query[c->first]=q;
 	}
-	write_out(query, out, job_name, upad);
+	write_out(query, out, job_name, upad, MIN);
 	for (int t = 0; t < DBS.size(); t++){
 		for (it_type_2 c=DBS[t].begin(); c!= DBS[t].end(); c++){
 			delete DBS[t][c->first];

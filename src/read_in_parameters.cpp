@@ -22,6 +22,7 @@ params::params(){
 	p["-pad"] 	= "0";
 	p["-upad"] 	= "0";
 	p["-N"] 	= "FIS_RUN";
+	p["-min"] 	= "0";
 }
 const std::string currentDateTime() {
     time_t     now = time(0);
