@@ -33,8 +33,12 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 
 	double a 	= -upad, b = upad;
 	map<string, vector<double> > distances ;
-	map<string, vector<double> > stats 		= get_stats(query,a,b,distances, MIN) ;
+	map<string, vector<vector<double>> > binned_distances ;
+	
+	map<string, vector<double> > stats 		= get_stats(query,a,b,distances, binned_distances, MIN) ;
 	typedef map<string, vector<double> >::iterator it_type_2;
+	typedef map<string, vector<vector<double> >>::iterator it_type_3;
+	
 	for (it_type_2 m = stats.begin(); m!=stats.end(); m++){
 		if (m->second.size()==8){
 			FHW_stats<<m->first+"\t" + to_string(m->second[0]) + ","+ to_string(m->second[1]) + "\t";
@@ -43,7 +47,22 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 			FHW_stats<<to_string(m->second[6]) + ","+ to_string(m->second[7]) + "\n";
 		}
 	}
-	FHW_stats<<"#begin distances\n";
+	FHW_stats<<"#begin binned distances\n";
+	for (it_type_3 m = binned_distances.begin(); m!=binned_distances.end(); m++){
+		string line = "";
+		FHW_stats<<m->first<<"\t";
+		for (int i = 0 ; i < m->second.size(); i++ ){
+			if (i+1 < m->second.size() ){
+				line+=to_string(m->second[i][0]) + "_" + to_string(m->second[i][1]) + ",";
+			}else{
+				line+=to_string(m->second[i][0]) + "_" + to_string(m->second[i][1]) ;
+			}	
+		}
+		FHW_stats<<line<<endl;
+
+	}
+
+	FHW_stats<<"#begin raw distances\n";
 	for (it_type_2 m = distances.begin(); m!=distances.end(); m++){
 		string line = "";
 		FHW_stats<<m->first<<"\t";

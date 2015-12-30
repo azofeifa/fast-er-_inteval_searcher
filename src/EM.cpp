@@ -76,12 +76,18 @@ double norm_pdf(double x, double mu, double si){
 	double vl  	= (1.0 / (sqrt(2*M_PI)*si  ))*exp(-pow(x-mu,2)/(2*pow(si,2))  );
 	return vl;
 }
+
+double laplace_pdf(double x, double mu, double b){
+	double vl 	= (1.0 / (2*b))*exp(-abs(x-mu)/b);
+	return vl;
+}
+
 double uni_pdf(double x, double a,double b){
 	double vl 	= 1.0 / (b-a);
 	return vl;
 }
 double depletion_func(double x, double MU, double SI, double a, double b){
-	return uni_pdf(x, a,b)	 / (uni_pdf(x,a,b) + norm_pdf(x, MU, SI));
+	return uni_pdf(x, a,b)	 / (uni_pdf(x,a,b) + laplace_pdf(x, MU, SI));
 }
 
 double EM(double ** X, int N, double & w, double & ll, double si, double mu, 
@@ -108,21 +114,26 @@ double EM(double ** X, int N, double & w, double & ll, double si, double mu,
 			double  n, u;
 			u = uni_pdf(X[i][0], a, b)*(1-w);
 			if (func_type==0){
-				n = norm_pdf(X[i][0], mu, si)*w;
+			//	n = norm_pdf(X[i][0], mu, si)*w; //deprecated in favor of laplace model
+				n =	laplace_pdf(X[i][0],mu, si)*w;
 			}else if(func_type==1) {
-				n = norm_pdf(X[i][0], mu, SI)*w;		
+			//	n = norm_pdf(X[i][0], mu, SI)*w;		//deprecated in favor of laplace model
+				n =	laplace_pdf(X[i][0],mu, SI)*w;
 			}else if (func_type==2){
 				n = depletion_func(X[i][0], mu, si, a,b)*w*(1.0 / C);				
 			}
 			if (func_type==1){
-				EX+=pow(X[i][0]-mu,2 )*(n / (n+u))*X[i][1];
+				//EX+=pow(X[i][0]-mu,2 )*(n / (n+u))*X[i][1]; //deprecated in favor of laplace model
+				EX+=abs(X[i][0]-mu )*(n / (n+u))*X[i][1];
+
 			}
 			EXN+=((n / (n+u)  )*X[i][1]);
 			EXU+=((u / (n+u)  )*X[i][1]);
 			ll+=(log( n + u   )*X[i][1]) ;
 		}
 		if (func_type==1){
-			SI 	= sqrt(EX / (EXN));
+		//	SI 	= sqrt(EX / (EXN)); //deprecated in favor of laplace model
+			SI 	=EX / (EXN);
 		}
 		w 	= EXN / (EXN + EXU);
 		if (abs(ll - prev_ll) < pow(10,-3) and t > 3) {
@@ -152,7 +163,7 @@ double normal_constant(double MU, double SI, double A, double B){
 
 
 map<string, vector<double> > get_stats(map<string, vector<segment>> query, 
-	double a, double b , map<string, vector<double> > & distances, int MIN){
+	double a, double b , map<string, vector<double> > & distances, map<string, vector<vector<double>> > & binned_distances, int MIN){
 	map<string, vector<double> > stats; 	
 
 	//get_distances_by_motif
@@ -166,8 +177,8 @@ map<string, vector<double> > get_stats(map<string, vector<segment>> query,
 
 	for (it_type m = distances.begin(); m!=distances.end(); m++){
 		if (m->second.size() > 0){
-			vector<double> current_stats(8);
 			double ** X = NULL;
+			vector<double> current_stats(8);
 			BIN(m->second, BINS,X);
 			double w_norm 	= 0.1, w_depletion=0.1, w_noise=1.0, ll_norm = 0, ll_depletion=0, ll_noise=0;
 			EM(X, BINS, w_norm, ll_norm , si,mu, 0, C, a,b);
@@ -177,11 +188,18 @@ map<string, vector<double> > get_stats(map<string, vector<segment>> query,
 
 			EM(X, BINS, w_depletion, ll_depletion , si,mu, 2, C, a,b);
 			EM(X, BINS, w_noise, ll_noise , si,mu, 3, C, a,b);
+			vector<vector<double>> bX;
 			if (X!=NULL){
 				for (int i = 0; i < BINS; i++){
+					vector<double> cX(2);
+					cX[0] 	= X[i][0],cX[1] 	= X[i][1];
+					bX.push_back(cX);
+
 					delete X[i];
 				}
 			}
+			binned_distances[m->first] 	= bX;
+			
 			current_stats[0]=w_norm,current_stats[1]=ll_norm;
 			
 			current_stats[2]=w_si,current_stats[3]=SI;
@@ -190,9 +208,8 @@ map<string, vector<double> > get_stats(map<string, vector<segment>> query,
 			current_stats[6]=0.0,current_stats[7]=ll_noise;
 
 			stats[m->first] 	= current_stats;
-
 		}
-
+	
 	}
 	return stats; 
 }
