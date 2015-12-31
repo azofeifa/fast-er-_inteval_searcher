@@ -62,20 +62,20 @@ void write_out(map<string, vector<segment>> query  , string OUT, string job_name
 
 	}
 
-	FHW_stats<<"#begin raw distances\n";
-	for (it_type_2 m = distances.begin(); m!=distances.end(); m++){
-		string line = "";
-		FHW_stats<<m->first<<"\t";
-		for (int i = 0 ; i < m->second.size(); i++){
-			if (i+1 < m->second.size() ){
-				line+=to_string(m->second[i])+ ",";
-			}else{
-				line+=to_string(m->second[i]);
-			}
-		}
-		FHW_stats<<line<<endl;
+	// FHW_stats<<"#begin raw distances\n";
+	// for (it_type_2 m = distances.begin(); m!=distances.end(); m++){
+	// 	string line = "";
+	// 	FHW_stats<<m->first<<"\t";
+	// 	for (int i = 0 ; i < m->second.size(); i++){
+	// 		if (i+1 < m->second.size() ){
+	// 			line+=to_string(m->second[i])+ ",";
+	// 		}else{
+	// 			line+=to_string(m->second[i]);
+	// 		}
+	// 	}
+	// 	FHW_stats<<line<<endl;
 		
-	}
+	// }
 
 
 
