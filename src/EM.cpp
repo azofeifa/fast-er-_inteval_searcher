@@ -161,6 +161,21 @@ double normal_constant(double MU, double SI, double A, double B){
 
 }
 
+void sample_stats(double ** X, int BINS, double & mean, double & SE, int W){
+	double S 	= 0.0;
+	double se 	= 0.0;
+	double N 	= 0.0;
+	for (int i = 0; i < BINS; i++){
+		S+=abs(X[i][0])*X[i][1];
+		N+=abs(X[i][1]);
+		if (abs(X[i][0]) < W  ){
+			se+=abs(X[i][1]);
+		}
+	}
+	mean 	= S / N;
+	SE 		= se / N;
+}
+
 
 map<string, vector<double> > get_stats(map<string, vector<segment>> query, 
 	double a, double b , map<string, vector<double> > & distances, map<string, vector<vector<double>> > & binned_distances, int MIN){
@@ -178,16 +193,18 @@ map<string, vector<double> > get_stats(map<string, vector<segment>> query,
 	for (it_type m = distances.begin(); m!=distances.end(); m++){
 		if (m->second.size() > 0){
 			double ** X = NULL;
-			vector<double> current_stats(8);
+			vector<double> current_stats(2);
 			BIN(m->second, BINS,X);
 			double w_norm 	= 0.1, w_depletion=0.1, w_noise=1.0, ll_norm = 0, ll_depletion=0, ll_noise=0;
-			EM(X, BINS, w_norm, ll_norm , si,mu, 0, C, a,b);
+			//EM(X, BINS, w_norm, ll_norm , si,mu, 0, C, a,b);
 			double w_si 	= w_norm, ll_si 	= 0;
 			double SI 		= EM(X, BINS, w_si, ll_si, si,mu, 1, C, a,b);
+			double sample_mean 	= 0;
+			double sample_SE 	= 0;
 
-
-			EM(X, BINS, w_depletion, ll_depletion , si,mu, 2, C, a,b);
-			EM(X, BINS, w_noise, ll_noise , si,mu, 3, C, a,b);
+			sample_stats(X, BINS, sample_mean, sample_SE, 300);
+			//EM(X, BINS, w_depletion, ll_depletion , si,mu, 2, C, a,b);
+			//EM(X, BINS, w_noise, ll_noise , si,mu, 3, C, a,b);
 			vector<vector<double>> bX;
 			if (X!=NULL){
 				for (int i = 0; i < BINS; i++){
@@ -200,13 +217,7 @@ map<string, vector<double> > get_stats(map<string, vector<segment>> query,
 			}
 			binned_distances[m->first] 	= bX;
 			
-			current_stats[0]=w_norm,current_stats[1]=ll_norm;
-			
-			current_stats[2]=w_si,current_stats[3]=SI;
-
-			current_stats[4]=w_depletion,current_stats[5]=ll_depletion;
-			current_stats[6]=0.0,current_stats[7]=ll_noise;
-
+			current_stats[0]=sample_mean,current_stats[1]=sample_SE;
 			stats[m->first] 	= current_stats;
 		}
 	
