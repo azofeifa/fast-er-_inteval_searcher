@@ -202,7 +202,7 @@ map<string, vector<double> > get_stats(map<string, vector<segment>> query,
 			double sample_mean 	= 0;
 			double sample_SE 	= 0;
 
-			sample_stats(X, BINS, sample_mean, sample_SE, 300);
+			sample_stats(X, BINS, sample_mean, sample_SE, 150);
 			//EM(X, BINS, w_depletion, ll_depletion , si,mu, 2, C, a,b);
 			//EM(X, BINS, w_noise, ll_noise , si,mu, 3, C, a,b);
 			vector<vector<double>> bX;
